@@ -1,0 +1,15 @@
+[gd_resource type="AnimationNodeBlendSpace1D" format=3 uid="uid://0q7fljbj5qh2"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_jct1e"]
+animation = &"HumanoidAnimLibrary/sneaking_forward1"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0hm4y"]
+animation = &"HumanoidAnimLibrary/running_forward1"
+
+[resource]
+blend_point_0/node = SubResource("AnimationNodeAnimation_jct1e")
+blend_point_0/pos = 0.5
+blend_point_0/name = &"Sneaking"
+blend_point_1/node = SubResource("AnimationNodeAnimation_0hm4y")
+blend_point_1/pos = 1.0
+blend_point_1/name = &"Running"
