@@ -213,15 +213,21 @@ func set_animation_blendspace1d_blend_position(animation_node_name: StringName, 
 ## Specific events are mapped to strongly-typed signals while
 ## every event is also forwarded through animation_event.
 func emit_event(event: StringName, args: Array = []) -> void:
-	super.emit_event(event, args)
 	match event:
+		END_DEATH:
+			death_animation_ended.emit()
+		STEP_LANDED:
+			if args.size() == 0: return
+			step_landed.emit(args[0])
 		CAST_START:
 			cast_animation_started.emit()
 		CAST_END:
 			cast_animation_ended.emit()
 		IMPACT:
 			cast_impact.emit()
-	animation_event.emit(event, args)
+		_:
+			animation_event.emit(event, args)
+
 
 #endregion
 

@@ -43,9 +43,10 @@ func is_paused() -> bool:
 ## qualquer AnimationPlayer por baixo, então pode viver aqui mesmo.
 func emit_event(event: StringName, args: Array = []) -> void:
 	match event:
-		END_DEATH:
-			death_animation_ended.emit()
+		#END_DEATH:
+			#death_animation_ended.emit()
 		STEP_LANDED:
 			if args.size() == 0: return
 			step_landed.emit(args[0])
-	animation_event.emit(event, args)
+		_:
+			animation_event.emit(event, args)
