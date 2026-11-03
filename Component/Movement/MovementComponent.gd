@@ -76,7 +76,7 @@ func _on_step_landed() -> void:
 			continue
 		
 		if result.collider is StaticBody3D:
-			if ray.global_position.distance_squared_to(result.position) < 0.027:
+			if ray.global_position.distance_squared_to(result.position) < 0.041:
 				if not raycast_feet_on_ground[member_name]:
 					_emit_step(member_name, result.position, _get_impact_intensity(current_step_velocity))
 			else:
