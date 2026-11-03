@@ -192,6 +192,7 @@ func set_icon(icon: Texture2D) -> void:
 
 
 func _on_animation_event(event: StringName, _args: Array) -> void:
+	print(event, "|", _args)
 	if definition and event == definition.cast_end_event:
 		stop_timer(CAST_SAFETY_TIMER_ID)
 		_enable_movement()

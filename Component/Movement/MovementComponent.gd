@@ -2,6 +2,7 @@ class_name MovementComponent extends EntityComponent3D
 
 signal hard_landing(impact_velocity: float)
 signal step_landed(member_name: StringName)
+signal foot_landed(step: StepEvent)
 
 const MAX_STEP_HEIGHT = 0.3
 const HARD_LANDING_THRESHOLD = 8.0
@@ -10,8 +11,14 @@ const HARD_LANDING_THRESHOLD = 8.0
 @export var valid_collider_classes: Array[StringName] = [
 	"StaticBody3D", "CSGShape3D"
 ]
+@export var raycast_feet:Dictionary[StringName, RayCast3D] = {}
+@export var watch_steps: bool = true
+@export var intensity_multiplier: float = 1.0
+@export var vertical_component_weight: float = 1.2
+@export var raycast_length: float = 0.25
 
-var animation_component: AnimationComponent
+var raycast_feet_on_ground:Dictionary[StringName, bool] = {}
+
 var action_provider_component: ActionProviderComponent
 
 var disable_movement: bool = false
@@ -21,19 +28,74 @@ var last_frame_was_on_floor: float = -INF
 var last_frame_was_on_air: float = -INF
 var vertical_velocity_before_impact: float = 0.0
 var last_vertical_impact_velocity = 0.0
+var last_horizontal_velocity = 0.0
+
+
+class StepEvent:
+	var uuid := UUID.new_uuid()
+	var entity: Entity3D
+	var member_name: StringName
+	var position: Vector3
+	var intensity: float
+	var direction: Vector3
+
+var current_step_velocity :Vector3 = Vector3.ZERO
 
 func setup(p_entity: Entity3D) -> void:
-	super(p_entity)
-	
-	animation_component = entity.get_component(AnimationComponent) as AnimationComponent
+	super.setup(p_entity)
+	if not get_parent() is VisualComponent:
+		push_error("MovementComponent must be child of a VisualComponent")
 	action_provider_component = entity.get_component(ActionProviderComponent) as ActionProviderComponent
+
+
+func _on_step_landed() -> void:
+	current_step_velocity = entity.velocity
+	current_step_velocity.y = last_vertical_impact_velocity
 	
-	if animation_component:
-		animation_component.step_landed.connect(_on_step_landed)
+	for member_name in raycast_feet.keys():
+		if not raycast_feet.has(member_name):
+			continue
+		if not raycast_feet_on_ground.has(member_name):
+			raycast_feet_on_ground[member_name] = false
+		var ray := raycast_feet[member_name]
+		
+		var from := ray.to_global(Vector3.ZERO)
+		var ray_dir := (ray.to_global(ray.target_position) - from).normalized()
+		var to := from + ray_dir * raycast_length
+		
+		var query := PhysicsRayQueryParameters3D.create(from, to)
+		query.collision_mask = ray.collision_mask
+		query.collide_with_areas = ray.collide_with_areas
+		query.collide_with_bodies = ray.collide_with_bodies
+		query.exclude = [entity]
+		
+		var result := entity.get_world_3d().direct_space_state.intersect_ray(query)
+
+		if result.is_empty():
+			raycast_feet_on_ground[member_name] = false
+			continue
+		
+		if result.collider is StaticBody3D:
+			if ray.global_position.distance_squared_to(result.position) < 0.027:
+				if not raycast_feet_on_ground[member_name]:
+					_emit_step(member_name, result.position, _get_impact_intensity(current_step_velocity))
+			else:
+				raycast_feet_on_ground[member_name] = false
 
 
-func _on_step_landed(member_name: StringName) -> void:
-	step_landed.emit(member_name)
+func _emit_step(member_name: StringName, step_position: Vector3, intensity: float) -> void:
+	var step := StepEvent.new()
+	step.entity = entity
+	step.member_name = member_name
+	step.position = step_position
+	step.intensity = intensity
+	step.direction = entity.get_forward()
+	raycast_feet_on_ground[member_name] = true
+	foot_landed.emit(step)
+
+
+func _get_impact_intensity(_current_step_velocity :Vector3) -> float:
+	return intensity_multiplier * (_current_step_velocity.length() + (abs(_current_step_velocity.y) * vertical_component_weight))
 
 
 func on_floor() -> bool:
@@ -67,7 +129,11 @@ func update_movement(delta: float, action_data: ActionData, state: BaseState) ->
 		entity.velocity = Vector3.ZERO
 	entity.velocity.y = vertical_speed
 
-	if entity.velocity.length() > 0.1:
+	var horizontal_velocity := Vector3(entity.velocity)
+	horizontal_velocity.y = 0
+	var horizontal_speed := horizontal_velocity.length()
+	
+	if horizontal_speed > 0.01:
 		entity.look_at_target(entity.global_position + direction, delta * 10)
 
 	if not _snap_up_to_stairs_check(delta):
@@ -82,9 +148,26 @@ func update_movement(delta: float, action_data: ActionData, state: BaseState) ->
 		if vertical_velocity_before_impact != 0.0:
 			if abs(vertical_velocity_before_impact) > HARD_LANDING_THRESHOLD:
 				hard_landing.emit(vertical_velocity_before_impact)
+			# falling steps
+			_check_steps(_get_impact_intensity(Vector3(0, vertical_velocity_before_impact, 0)))
 			vertical_velocity_before_impact = 0.0
 		last_frame_was_on_floor = Engine.get_physics_frames()
+	
+	if horizontal_speed > 0.01:
+		if watch_steps:
+			_on_step_landed()
+	else:
+		if last_horizontal_velocity > 0.01:
+			# catch intermitent input movement
+			_check_steps(_get_impact_intensity(current_step_velocity))
+	last_horizontal_velocity = horizontal_speed
 
+
+func _check_steps(intensity: float) -> void:
+	if not watch_steps:
+		return
+	for member_name in raycast_feet:
+		_emit_step(member_name, raycast_feet[member_name].global_position, intensity)
 
 #region STAIRS HANDLER
 func _snap_down_to_stairs_check() -> void:

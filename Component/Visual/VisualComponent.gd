@@ -7,15 +7,6 @@ class_name VisualComponent extends EntityComponent3D
 @onready var stairs_ahead_ray_cast_3d: RayCast3D = %StairsAheadRayCast3D
 @onready var stairs_below_ray_cast_3d: RayCast3D = %StairsBelowRayCast3D
 
-@onready var head_top: Marker3D = %Top
-@onready var eye: Marker3D = %Eye
-@onready var knee: Marker3D = %Knee
-@onready var feet: Marker3D = %Feet
-@onready var left_hand: Marker3D = %LeftHand
-@onready var right_hand: Marker3D = %RightHand
-@onready var left_foot: Marker3D = %LeftFoot
-@onready var right_foot: Marker3D = %RightFoot
-
 @export var markers: Dictionary[StringName, Marker3D] = {}
 
 
