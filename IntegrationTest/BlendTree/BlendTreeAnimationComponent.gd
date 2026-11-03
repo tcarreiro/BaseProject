@@ -216,9 +216,6 @@ func emit_event(event: StringName, args: Array = []) -> void:
 	match event:
 		END_DEATH:
 			death_animation_ended.emit()
-		STEP_LANDED:
-			if args.size() == 0: return
-			step_landed.emit(args[0])
 		CAST_START:
 			cast_animation_started.emit()
 		CAST_END:
@@ -404,10 +401,6 @@ func register_event(animation_name: StringName, event: StringName, args: Array =
 		}
 	)
 	ResourceSaver.save(animation)
-
-
-func register_foot_landed_event(animation_name: StringName, foot_name: StringName) -> void:
-	register_event(animation_name, STEP_LANDED, [foot_name])
 
 
 func register_cast_end_event(animation_name: StringName) -> void:

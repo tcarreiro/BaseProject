@@ -6,7 +6,6 @@ signal step_landed(member_name: StringName)
 
 #region Event Types
 const END_DEATH = &"DeathEnd"
-const STEP_LANDED = &"StepLanded"
 #endregion
 
 
@@ -43,10 +42,7 @@ func is_paused() -> bool:
 ## qualquer AnimationPlayer por baixo, então pode viver aqui mesmo.
 func emit_event(event: StringName, args: Array = []) -> void:
 	match event:
-		#END_DEATH:
-			#death_animation_ended.emit()
-		STEP_LANDED:
-			if args.size() == 0: return
-			step_landed.emit(args[0])
+		END_DEATH:
+			death_animation_ended.emit()
 		_:
 			animation_event.emit(event, args)
