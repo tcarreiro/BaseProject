@@ -49,6 +49,9 @@ func setup(p_entity: Entity3D) -> void:
 
 
 func _on_step_landed() -> void:
+	if not watch_steps:
+		return
+	
 	current_step_velocity = entity.velocity
 	current_step_velocity.y = last_vertical_impact_velocity
 	
@@ -154,8 +157,7 @@ func update_movement(delta: float, action_data: ActionData, state: BaseState) ->
 		last_frame_was_on_floor = Engine.get_physics_frames()
 	
 	if horizontal_speed > 0.01:
-		if watch_steps:
-			_on_step_landed()
+		_on_step_landed()
 	else:
 		if last_horizontal_velocity > 0.01:
 			# catch intermitent input movement
@@ -168,6 +170,7 @@ func _check_steps(intensity: float) -> void:
 		return
 	for member_name in raycast_feet:
 		_emit_step(member_name, raycast_feet[member_name].global_position, intensity)
+
 
 #region STAIRS HANDLER
 func _snap_down_to_stairs_check() -> void:
