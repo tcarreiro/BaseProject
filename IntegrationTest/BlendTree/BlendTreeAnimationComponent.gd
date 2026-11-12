@@ -213,6 +213,7 @@ func set_animation_blendspace1d_blend_position(animation_node_name: StringName, 
 ## Specific events are mapped to strongly-typed signals while
 ## every event is also forwarded through animation_event.
 func emit_event(event: StringName, args: Array = []) -> void:
+	# TBD: do I need to emit events that way? or animation_event is enough?
 	match event:
 		END_DEATH:
 			death_animation_ended.emit()
@@ -222,8 +223,8 @@ func emit_event(event: StringName, args: Array = []) -> void:
 			cast_animation_ended.emit()
 		IMPACT:
 			cast_impact.emit()
-		_:
-			animation_event.emit(event, args)
+	# all events are sent in animation_event
+	animation_event.emit(event, args)
 
 
 #endregion

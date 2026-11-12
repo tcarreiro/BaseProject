@@ -52,16 +52,20 @@ func _on_hit(body: Node3D) -> void:
 	if not target or not is_opponent(caster, target):
 		return
 	_collided = true
-	_play_animation("Explosion")
 	_apply_damage(target)
+	_play_animation("ExplosionFireball")
 	cast_hit.emit(target)
-	finished.emit()
-	queue_free()
 
 
 func _cast_projectile() -> void:
 	super._cast_projectile()
 	_play_animation("Cast")
+
+
+func end() -> void:
+	super.end()
+	finished.emit()
+	queue_free()
 
 
 func _apply_damage(target: Entity3D) -> void:

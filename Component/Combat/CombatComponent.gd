@@ -36,9 +36,10 @@ signal shielded(amount: int, shield_cut: bool, shield_amplified: bool)
 @export var base_heal_power: float = 0.0
 @export var base_shield_power: float = 0.0
 
+var _dead: bool = false   # junto de current_hp
 
 var effective_max_hp: float:
-	get: return base_max_hp + modifiers.max_hp
+	get: return maxf(base_max_hp + modifiers.max_hp, 1.0)
 var effective_armor: float:
 	get: return maxf(base_armor + modifiers.armor, -99.0)
 var effective_magic_resist: float:
@@ -50,11 +51,11 @@ var effective_magic_damage: float:
 var effective_attack_range: float:
 	get: return base_attack_range + modifiers.attack_range
 var effective_attack_speed: float:
-	get: return base_attack_speed + modifiers.attack_speed
+	get: return maxf(base_attack_speed + modifiers.attack_speed, MINIMUM_ATTACK_SPEED)
 var effective_movement_speed: float:
-	get: return base_movement_speed + modifiers.movement_speed
+	get: return maxf(base_movement_speed + modifiers.movement_speed, MINIMUM_MOVEMENT_SPEED_MULTIPLIER)
 var effective_ability_haste: float:
-	get: return maxf(base_ability_haste + modifiers.ability_haste, 0)
+	get: return maxf(base_ability_haste + modifiers.ability_haste, MINIMUM_ABILITY_HASTE)
 var effective_heal_power: float:
 	get: return maxf(base_heal_power + modifiers.heal_power, 0.0)
 var effective_shield_power: float:
@@ -142,10 +143,16 @@ func take_damage(attack_data: AttackData) -> int:
 	var damage_data = DamageResultData.new(residual_damage, attack_data.damage_type, mitigated_damage, shield_block)
 	damage_received.emit(damage_data)
 
-	if current_hp <= 0.0:
+	if current_hp <= 0.0 and not _dead:
+		_dead = true
 		died.emit()
 
 	return residual_damage
+
+
+func ressurrect() -> void:
+	if _dead:
+		_dead = false
 
 
 func heal(heal_data: HealData) -> void:
@@ -179,15 +186,16 @@ func remove_modifier(mod: StatModifiers) -> void:
 func _compute_modifiers() -> StatModifiers:
 	var modifier := StatModifiers.new()
 	for mod in active_modifiers.values():
-		modifier.max_hp += maxf(mod.max_hp, 1.0)
+		modifier.max_hp += mod.max_hp
+		modifier.attack_range += mod.attack_range
+		modifier.attack_speed += mod.attack_speed
+		modifier.movement_speed += mod.movement_speed
+		modifier.ability_haste += mod.ability_haste
 		modifier.armor += mod.armor
 		modifier.magic_resist += mod.magic_resist
 		modifier.physical_damage += mod.physical_damage
 		modifier.magic_damage += mod.magic_damage
-		modifier.attack_range += maxf(mod.attack_range, 0.0)
-		modifier.attack_speed += maxf(mod.attack_speed, MINIMUM_ATTACK_SPEED)
 		modifier.movement_speed += maxf(mod.movement_speed, 0.0)
-		modifier.ability_haste += maxf(mod.ability_haste, MINIMUM_ABILITY_HASTE)
 		modifier.heal_power += mod.heal_power
 		modifier.shield_power += mod.shield_power
 	return modifier

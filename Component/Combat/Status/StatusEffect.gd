@@ -12,10 +12,10 @@ class_name StatusEffect extends Resource
 @export var blocks_damage_of_type: Array[StringName] = []
 @export var tick_rate: float = 1.0
 
-## Se true, todo dano/cura gerado pelos ticks deste efeito compartilha o
+## Para usar com DamageNumberDisplay. Se true, todo dano/cura gerado pelos ticks deste efeito compartilha o
 ## mesmo uuid do efeito — o HUD de números de dano acumula no mesmo texto
 ## em vez de criar um novo a cada tick. Se false, cada tick gera um número
-## novo e independente.
+## novo e independente. 
 @export var aggregate_hud_numbers: bool = true
 
 func _on_apply(_target: Entity3D, _source: Entity3D) -> void:

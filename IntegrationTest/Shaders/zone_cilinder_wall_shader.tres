@@ -1,7 +1,7 @@
 [gd_resource type="VisualShader" format=3 uid="uid://c01r6el1vxiof"]
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_gwehe"]
-size = Vector2(1587, 911)
+size = Vector2(1576, 911)
 title = "Main Texture"
 attached_nodes = PackedInt32Array(9, 4, 7, 3, 8, 6, 5, 2)
 
@@ -30,7 +30,7 @@ texture_repeat = 1
 [sub_resource type="VisualShaderNodeFloatOp" id="VisualShaderNodeFloatOp_38xkf"]
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_vbyae"]
-size = Vector2(783, 510.99997)
+size = Vector2(783, 511)
 title = "Fade Texture"
 attached_nodes = PackedInt32Array(23, 22)
 
@@ -52,7 +52,7 @@ operator = 1
 [sub_resource type="VisualShaderNodeClamp" id="VisualShaderNodeClamp_gwehe"]
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_gjpfq"]
-size = Vector2(767.00006, 571)
+size = Vector2(756, 571)
 title = "Color"
 attached_nodes = PackedInt32Array(27, 28)
 
