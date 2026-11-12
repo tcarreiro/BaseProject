@@ -9,6 +9,7 @@ var available_states: Dictionary[StringName, BaseState] = {}
 var current_state: BaseState
 var _previous_state: BaseState
 var action_provider_component: ActionProviderComponent
+var active = true
 
 
 func setup(p_entity: Entity3D) -> void:
@@ -36,11 +37,13 @@ func _enter_initial_state() -> void:
 
 
 func _process(delta: float) -> void:
+	if not active: return
 	if current_state:
 		current_state.update(delta)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not active: return
 	if current_state:
 		current_state.handle_input(event)
 	if action_provider_component:
@@ -50,6 +53,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not active: return
 	if not action_provider_component or not current_state:
 		return
 	var action_data := action_provider_component.resolve_movement_action()
