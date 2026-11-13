@@ -195,7 +195,6 @@ func _compute_modifiers() -> StatModifiers:
 		modifier.magic_resist += mod.magic_resist
 		modifier.physical_damage += mod.physical_damage
 		modifier.magic_damage += mod.magic_damage
-		modifier.movement_speed += maxf(mod.movement_speed, 0.0)
 		modifier.heal_power += mod.heal_power
 		modifier.shield_power += mod.shield_power
 	return modifier
