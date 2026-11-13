@@ -1,21 +1,10 @@
 class_name InventoryComponent extends EntityComponent3D
-## Holds ItemStacks. Each stack holds every real instance of one species (same id).
+## Holds ItemStacks. Loot with uuid keeps every real instance of one species (same id).
+## If loot has no uuid, it keeps only one instance alive.
 ## The position of a stack is its index in `_content`: there are no holes. Swapping two
 ## slots swaps two indexes; dropping on "an empty slot" means moving to the end.
 ## Every mutation is validated first (can_*), applied, and then announced:
 ## signals are emitted only after the container(s) are consistent, once per operation.
-## Quantities are always counts of instances: adding 3 potions = adding 3 Loot objects.
-# TODO: Should be implemented at project level, not here. This is just a placeholder for the type.
-class Loot:
-	extends Resource
-	@export var id: StringName
-	@export var display_name: StringName
-	@export var description: String
-	@export var icon: Texture2D
-	@export var max_stack: int:
-		set(v):
-			max_stack = maxi(v, 0)
-	@export var extra_tags: Array[StringName] = []
 
 const Fail := OperationResult.FailReason
 

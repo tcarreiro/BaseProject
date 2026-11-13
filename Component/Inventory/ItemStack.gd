@@ -11,7 +11,7 @@ class_name ItemStack extends Resource
 const UNLIMITED: int = 1 << 30
 
 ## For non-unique Loot (no UUID), saves only one instance at items[0]
-@export var items: Array[InventoryComponent.Loot] = []
+@export var items: Array[Loot] = []
 ## Used only for non-unique Loot (no UUID)
 @export var common_quantity: int = 0
 @export var _unique: bool = false
@@ -22,7 +22,7 @@ var quantity: int:
 
 
 # Defaults are required: Godot calls _init() with no arguments when loading a .tres
-func _init(p_items: Array[InventoryComponent.Loot] = []) -> void:
+func _init(p_items: Array[Loot] = []) -> void:
 	if not p_items.is_empty():
 		if "uuid" in p_items[0]:
 			items = p_items.duplicate()
@@ -34,7 +34,7 @@ func _init(p_items: Array[InventoryComponent.Loot] = []) -> void:
 			_unique = false
 
 
-static func has_identity(p_loot: InventoryComponent.Loot) -> bool:
+static func has_identity(p_loot: Loot) -> bool:
 	return "uuid" in p_loot
 
 
@@ -47,7 +47,7 @@ func get_loot_id() -> StringName:
 
 
 ## Any instance, for display (name, icon). Do not rely on it for per-instance state.
-func get_sample() -> InventoryComponent.Loot:
+func get_sample() -> Loot:
 	return null if items.is_empty() else items[0]
 
 
@@ -71,8 +71,8 @@ func is_full() -> bool:
 ## The units at positions [p_start, p_start + p_count) of the stack, as a flat list.
 ## Unique: the real instances, in order. Common: the representative repeated once per unit.
 ## The range is clamped to the stack, so asking for more than it has just returns what exists.
-func get_units(p_start: int, p_count: int) -> Array[InventoryComponent.Loot]:
-	var units: Array[InventoryComponent.Loot] = []
+func get_units(p_start: int, p_count: int) -> Array[Loot]:
+	var units: Array[Loot] = []
 	var first := clampi(p_start, 0, quantity)
 	var last := clampi(p_start + p_count, first, quantity)
 	if _unique:
@@ -85,17 +85,17 @@ func get_units(p_start: int, p_count: int) -> Array[InventoryComponent.Loot]:
 
 
 ## Every unit of the stack. Unique: each instance. Common: the representative once per unit.
-func get_all_units() -> Array[InventoryComponent.Loot]:
+func get_all_units() -> Array[Loot]:
 	return get_units(0, quantity)
 
 
 ## The first `p_count` units, in stack order.
-func get_first_units(p_count: int) -> Array[InventoryComponent.Loot]:
+func get_first_units(p_count: int) -> Array[Loot]:
 	return get_units(0, p_count)
 
 
 ## The last `p_count` units, in stack order (the ones that leave first in a split or merge).
-func get_last_units(p_count: int) -> Array[InventoryComponent.Loot]:
+func get_last_units(p_count: int) -> Array[Loot]:
 	var count := clampi(p_count, 0, quantity)
 	return get_units(quantity - count, count)
 
@@ -104,7 +104,7 @@ func get_last_units(p_count: int) -> Array[InventoryComponent.Loot]:
 ## Same id, the same kind (unique with unique, common with common), and both stackable.
 ## Differences in state (effects, durability) do NOT matter.
 ## Whether the stack still has room is a separate question: see get_free_space().
-func accepts(p_loot: InventoryComponent.Loot) -> bool:
+func accepts(p_loot: Loot) -> bool:
 	if p_loot == null or items.is_empty():
 		return false
 	if p_loot.id != items[0].id:
@@ -114,19 +114,19 @@ func accepts(p_loot: InventoryComponent.Loot) -> bool:
 	return p_loot.can_stack() and items[0].can_stack()
 
 
-func contains(p_loot: InventoryComponent.Loot) -> bool:
+func contains(p_loot: Loot) -> bool:
 	return find_index_of(p_loot) != -1
 
 
-func find_index_of(p_loot: InventoryComponent.Loot) -> int:
+func find_index_of(p_loot: Loot) -> int:
 	if p_loot == null:
 		return -1
 	if _unique:
 		return items.find(p_loot)
-	return items.find_custom(func(l: InventoryComponent.Loot): return l.id == p_loot.id)
+	return items.find_custom(func(l: Loot): return l.id == p_loot.id)
 
 
-func add_item(p_loot: InventoryComponent.Loot) -> void:
+func add_item(p_loot: Loot) -> void:
 	if p_loot == null:
 		return
 	if items.is_empty():
@@ -145,7 +145,7 @@ func add_item(p_loot: InventoryComponent.Loot) -> void:
 	common_quantity += 1
 
 
-func remove_item(p_loot: InventoryComponent.Loot) -> bool:
+func remove_item(p_loot: Loot) -> bool:
 	if p_loot == null or items.is_empty():
 		return false
 	var index := find_index_of(p_loot)
@@ -160,7 +160,7 @@ func remove_item(p_loot: InventoryComponent.Loot) -> bool:
 	return true
 
 
-func pop_item() -> InventoryComponent.Loot:
+func pop_item() -> Loot:
 	if items.is_empty():
 		return null
 	if not _unique:
